@@ -5,12 +5,44 @@ from . import food_bp
 from models import db
 from utils.response import standard_response
 
+@food_bp.route('/all', methods=['GET'])
+def get_foods():
+    foods = Food.query.all()
+    foods_list = [{
+        "id": f.id,
+        "name": f.name,
+        "description": f.description,
+        "photo": f.photo,
+        "whatsapp_number": f.whatsapp_number,
+        "price": f.price,
+        "category": f.category.name
+    } for f in foods]
+    return standard_response(200, "Foods retrieved successfully", foods_list)
+
 
 @food_bp.route('/categories', methods=['GET'])
 def get_categories():
     categories = Category.query.all()
     categories_list = [{"id": c.id, "name": c.name, "photo": c.photo} for c in categories]
     return standard_response(200, "Categories retrieved successfully", categories_list)
+
+
+@food_bp.route('/category/<int:category_id>', methods=['GET'])
+def get_foods_by_category(category_id):
+    category = Category.query.get_or_404(category_id)
+    foods = Food.query.filter_by(category_id=category.id).all()
+    foods_list = [{
+        "id": f.id,
+        "name": f.name,
+        "description": f.description,
+        "photo": f.photo,
+        "whatsapp_number": f.whatsapp_number,
+        "price": f.price,
+        "category": f.category.name,
+        "contents": [content.name for content in f.contents]
+    } for f in foods]
+    return standard_response(200, f"Foods in category '{category.name}' retrieved successfully", foods_list)
+
 
 
 @food_bp.route('/search', methods=['GET'])
