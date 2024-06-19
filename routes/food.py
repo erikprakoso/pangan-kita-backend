@@ -4,8 +4,10 @@ from models.model import Food, Category
 from . import food_bp
 from models import db
 from utils.response import standard_response
+from flask_jwt_extended import jwt_required, get_jwt_identity 
 
 @food_bp.route('/all', methods=['GET'])
+@jwt_required()
 def get_foods():
     foods = Food.query.all()
     foods_list = [{
@@ -21,6 +23,7 @@ def get_foods():
 
 
 @food_bp.route('/categories', methods=['GET'])
+@jwt_required()
 def get_categories():
     categories = Category.query.all()
     categories_list = [{"id": c.id, "name": c.name, "photo": c.photo} for c in categories]
@@ -28,6 +31,7 @@ def get_categories():
 
 
 @food_bp.route('/category/<int:category_id>', methods=['GET'])
+@jwt_required()
 def get_foods_by_category(category_id):
     category = Category.query.get_or_404(category_id)
     foods = Food.query.filter_by(category_id=category.id).all()
@@ -46,6 +50,7 @@ def get_foods_by_category(category_id):
 
 
 @food_bp.route('/search', methods=['GET'])
+@jwt_required()
 def search_food():
     query = request.args.get('q')
     foods = Food.query.filter(Food.name.contains(query)).all()
@@ -64,6 +69,7 @@ def search_food():
 
 
 @food_bp.route('/detail/<int:food_id>', methods=['GET'])
+@jwt_required()
 def food_detail(food_id):
     food = Food.query.get_or_404(food_id)
     food_data = {
@@ -80,6 +86,7 @@ def food_detail(food_id):
     return standard_response(200, "Food detail retrieved successfully", food_data)
 
 @food_bp.route('/photo/<path:filename>', methods=['GET'])
+@jwt_required()
 def get_photo(filename):
     return send_from_directory('uploads', filename)
 

@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import create_access_token  # Import create_access_token
 from models.model import User
 from . import auth_bp
 from models import db
@@ -29,10 +30,12 @@ def login():
     data = request.get_json()
     user = User.query.filter_by(username=data['username']).first()
     if user and check_password_hash(user.password, data['password']):
+        access_token = create_access_token(identity={'username': user.username, 'email': user.email})  # Create JWT token
         user_data = {
             'id': user.id,
             'email': user.email,
-            'username': user.username
+            'username': user.username,
+            'access_token': access_token  # Include JWT token in response
         }
         return standard_response(200, "Login successful", user_data)  # Using standard_response function
     return standard_response(401, "Invalid credentials")  # Using standard_response function
